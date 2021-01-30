@@ -1,0 +1,25 @@
+{
+  "name": "skylark-elfinder",
+  "version": "0.9.0",
+  "description": "A version of elfinder that ported to running on skylarkjs.",
+  "keywords": [
+    "skylark",
+    "skylarkjs",
+    "files",
+    "elfinder"
+  ],
+  "dependencies": {
+    "skylark-jqueryui": "git+https://github.com/skylark-integration/skylark-jqueryui.git#master",
+    "skylark-jquery": "git+https://github.com/skylark-integration/skylark-jquery.git#master",
+    "skylark-langx": "git+https://github.com/skylarklangx/skylark-langx.git#master",
+    "skylark-net-http": "git+https://github.com/skylark-net/skylark-net-http.git#master"
+  },
+  "scripts": {
+    "build": "sbundle build ."
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skylark-integration/skylark-elfinder.git"
+  }
+}

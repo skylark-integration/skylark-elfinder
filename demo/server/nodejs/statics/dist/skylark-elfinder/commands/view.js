@@ -1,0 +1,9 @@
+/**
+ * skylark-elfinder - A version of elfinder that ported to running on skylarkjs.
+ * @author 
+ * @version v0.9.0
+ * @link 
+ * @license MIT
+ */
+define(["../elFinder"],function(t){return t.prototype.commands.view=function(){"use strict";var t,e=this,i=this.fm;this.value=i.viewType,this.alwaysEnabled=!0,this.updateOnSelect=!1,this.options={ui:"viewbutton"},this.getstate=function(){return 0},this.extra={icon:"menu",node:$("<span/>").attr({title:i.i18n("viewtype")}).on("click touchstart",function(t){if(!("touchstart"===t.type&&t.originalEvent.touches.length>1)){var e=$(this);t.stopPropagation(),t.preventDefault(),i.trigger("contextmenu",{raw:getSubMenuRaw(),x:e.offset().left,y:e.offset().top})}})},this.exec=function(){var t=this,e="list"==this.value?"icons":"list";return i.storage("view",e),i.lazy(function(){i.viewchange(),t.update(void 0,e),this.resolve()})},i.bind("init",function(){t=function(){var t,n=i.getUI("cwd"),o=[],s=i.options.uiOptions.cwd.iconsView.sizeNames,a=i.options.uiOptions.cwd.iconsView.sizeMax;for(t=0;t<=a;t++)o.push({label:i.i18n(s[t]||"Size-"+t+" icons"),icon:"view",callback:function(t){return function(){n.trigger("iconpref",{size:t}),i.storage("iconsize",t),"list"===e.value&&e.exec()}}(t)});return o.push("|"),o.push({label:i.i18n("viewlist"),icon:"view-list",callback:function(){"list"!==e.value&&e.exec()}}),o}()}).bind("contextmenucreate",function(){e.extra={icon:"menu",node:$("<span/>").attr({title:i.i18n("cmdview")}).on("click touchstart",function(n){if(!("touchstart"===n.type&&n.originalEvent.touches.length>1)){var o,s,a=$(this);t.concat();for(o="list"===e.value?t.length-1:parseInt(i.storage("iconsize")||0),s=0;s<t.length;s++)"|"!==t[s]&&(t[s].options=s===o?{className:"ui-state-active"}:void 0);n.stopPropagation(),n.preventDefault(),i.trigger("contextmenu",{raw:t,x:a.offset().left,y:a.offset().top})}})}})},t});
+//# sourceMappingURL=../sourcemaps/commands/view.js.map

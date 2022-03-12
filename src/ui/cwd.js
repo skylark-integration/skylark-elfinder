@@ -393,7 +393,8 @@ define([
 						s, n, sib, top, left;
 
 					function sibling(n, direction) {
-						return n[direction+'All']('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):first');
+						//return n[direction+'All']('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):first');
+						return n[direction]('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent)');
 					}
 					
 					if (sel.length) {

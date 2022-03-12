@@ -22,4 +22,7 @@ const roots = [
 // CORSを許可する
 app.use( "/connector",elFinder( roots ) );
 
+app.use('/public', express.static('statics'))
+
+
 app.listen( process.env.PORT || 3000 );

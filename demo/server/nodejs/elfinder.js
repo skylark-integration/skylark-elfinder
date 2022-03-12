@@ -26,11 +26,11 @@ module.exports = function( roots ){
 	})
 
 
-	var whitelist = ['null', 'localhost']
+	var whitelist = ['null', 'localhost','http://localhost:8080','http://localhost:3000']
 	var corsOptions = {
 	  origin: function (origin, callback) {
 	    console.log("cors client:" + origin);
-	    if (whitelist.indexOf(origin) !== -1) {
+	    if (!origin || whitelist.indexOf(origin) !== -1) {
 	      callback(null, true)
 	    } else {
 	      callback(new Error('Not allowed by CORS'))
@@ -112,6 +112,7 @@ module.exports = function( roots ){
 	return router;
 
 }
+
 
 module.exports.LocalFileStorage = LFS;
 module.exports.utils = utils;

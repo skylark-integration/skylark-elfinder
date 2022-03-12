@@ -1,9 +1,0 @@
-/**
- * skylark-elfinder - A version of elfinder that ported to running on skylarkjs.
- * @author 
- * @version v0.9.0
- * @link 
- * @license MIT
- */
-define(["skylark-jquery"],function(t){return t.fn.elfindertoast=function(e,n){"use strict";var o=Object.assign({mode:"success",msg:"",showMethod:"fadeIn",showDuration:300,showEasing:"swing",onShown:void 0,hideMethod:"fadeOut",hideDuration:1500,hideEasing:"swing",onHidden:void 0,timeOut:3e3,extNode:void 0,button:void 0,width:void 0},t.isPlainObject(n.options.uiOptions.toast.defaults)?n.options.uiOptions.toast.defaults:{});return this.each(function(){e=Object.assign({},o,e||{});var i,s=t(this),u=function(t){s.stop(),n.toFront(s),s[e.showMethod]({duration:e.showDuration,easing:e.showEasing,complete:function(){e.onShown&&e.onShown(),!t&&e.timeOut&&(i=setTimeout(a,e.timeOut))}})},a=function(){s[e.hideMethod]({duration:e.hideDuration,easing:e.hideEasing,complete:function(){e.onHidden&&e.onHidden(),s.remove()}})};s.on("click",function(t){t.stopPropagation(),t.preventDefault(),i&&clearTimeout(i),e.onHidden&&e.onHidden(),s.stop().remove()}).on("mouseenter mouseleave",function(t){e.timeOut&&(i&&clearTimeout(i),i=null,"mouseenter"===t.type?u(!0):i=setTimeout(a,e.timeOut))}).hide().addClass("toast-"+e.mode).append(t('<div class="elfinder-toast-msg"/>').html(e.msg.replace(/%([a-zA-Z0-9]+)%/g,function(t,e){return n.i18n(e)}))),e.extNode&&s.append(e.extNode),e.button&&s.append(t('<button class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"/>').append(t('<span class="ui-button-text"/>').text(n.i18n(e.button.text))).on("mouseenter mouseleave",function(e){t(this).toggleClass("ui-state-hover","mouseenter"==e.type)}).on("click",e.button.click||function(){})),e.width&&s.css("max-width",e.width),u()})},t});
-//# sourceMappingURL=../sourcemaps/ui/toast.js.map

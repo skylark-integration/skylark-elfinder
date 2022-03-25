@@ -5,12 +5,30 @@ var lz = require('lzutf8'),	//Remove after decoupling
 	_ = require('underscore'),
 	Jimp = require('jimp'),
 	fs = require('fs'),
-	nfs = require("skynode-nfs");
+	nfs = require("skynode-nfs"),
+	vfs = require("skynode-filesystems/vfs");
+
+var volumes = [];
 
 var private = module.exports;
 
 //private
 private.compress = function(files, dest) {
+	var infos = files.map(function(file){
+		return private.decode(file);
+	});
+	var sources = [],
+		volumeNo;
+	for (var i =0; i<infos.length;i++) {
+		volumeNo = infos[i].volume;
+		sources.push(infos[i].path);
+	}
+
+	return volumes[volumeNo].archive(sources,dest,{
+      store: true // Sets the compression method to STORE.    
+    });
+
+	/*
 	var sources = files.map(function(file){
 		return private.decode(file).absolutePath;
 	});
@@ -20,7 +38,6 @@ private.compress = function(files, dest) {
 	return nfs.archive(sources,dest,{
 		store: true // Sets the compression method to STORE.		
 	});
-	/*
 	return new promise(function(resolve, reject) {
 		var output = fs.createWriteStream(dest);
 		var archive = archiver('zip', {
@@ -52,24 +69,45 @@ private.compress = function(files, dest) {
 	})
 	*/
 }
+
+//Used by private.parse & config.acl
+private.volume = function(p) {
+	for (var i = 0; i < volumes.length; i++) {
+		if (i > 9) return -1;
+		if (p.indexOf(volumes[i].toRealPath("")) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+//Used by private.encode & private.info
+private.parse = function(p) {
+	var v = private.volume(p);
+	var root = config.volumes[v] || "";
+	var relative = p.substr(root.length, p.length - root.length);
+	if (!relative.indexOf(path.sep) == 0) relative = path.sep + relative;
+	return {
+		volume: v,
+		dir: root,
+		path: relative,
+		isRoot: relative == path.sep
+	}
+}
+
 private.decode = function(dir) {
-	var root, code, name, volume;
+	var root, code, name, volumeNo;
 	if (!dir || dir.length < 4) throw Error('Invalid Path');
 	if (dir[0] != 'v' || dir[2] != '_') throw Error('Invalid Path');
-	volume = parseInt(dir[1]);
+	volumeNo = parseInt(dir[1]);
 
-	var relative = dir.substr(3, dir.length - 3)
-		.replace(/-/g, '+')
-		.replace(/_/g, '/')
-		.replace(/\./g, '=');
+	var relative = volumes[volumeNo].decode(dir.substr(3, dir.length - 3))
 
-	relative = lz.decompress(relative + '==', {
-		inputEncoding: "Base64"
-	});
 	name = path.basename(relative);
-	root = config.volumes[volume];
+	root = volumes[volumeNo].toRealPath("");
 	return {
-		volume: volume,
+		volume: volumeNo,
 		dir: root,
 		path: relative,
 		name: name,
@@ -80,32 +118,24 @@ private.decode = function(dir) {
 //Used by private.info, api.opne, api.tmb, api.zipdl
 private.encode = function(dir) {
 	var info = private.parse(dir);
-	relative = lz.compress(info.path, {
-			outputEncoding: "Base64"
-		})
-		.replace(/=+$/g, '')
-		.replace(/\+/g, '-')
-		.replace(/\//g, '_')
-		.replace(/=/g, '.');
+	relative = volumes[info.volume].encode(info.path);
 	return 'v' + info.volume + '_' + relative;
 }
 
 var config;
 
-private.filepath = function(volume, filename) {
-	if (volume < 0 || volume > 2) return null;
-	return path.join(config.volumes[volume], path.normalize(filename));
+private.filepath = function(volumeNo, filename) {
+	if (volumeNo < 0 || volumeNo > 2) return null;
+	//return path.join(config.volumes[volume], path.normalize(filename));
+	return volumes[volumeNo].toRealPath(filename);
 }
 
 private.info = function(p) {
 	return new promise(function(resolve, reject) {
-		console.log("private.info.p:" + p);
 		var info = private.parse(p);
-		console.log("private.info:parse:" + JSON.stringify(p));
 		if (info.volume < 0) return reject('Volume not found');
 
 		nfs.stat(p, function(err, stat) {
-			console.log("private.info.fs.stat:" + err);
 			if (err) return reject(err);
 			var r = {
 				name: path.basename(p),
@@ -164,7 +194,6 @@ private.info = function(p) {
 					}
 				}
 			}
-			console.log("private.info.fs.stat2:" + JSON.stringify(r));
 			resolve(r);
 		})
 	})
@@ -174,6 +203,7 @@ private.init = function(_config) {
 	config = _config;
 	var tasks = [];
 	_.each(config.volumes, function(volume) {
+		volumes.push(vfs.createVFS(volume));
 		tasks.push(private.info(volume));
 	})
 
@@ -186,19 +216,6 @@ private.init = function(_config) {
 		})
 }
 
-//Used by private.encode & private.info
-private.parse = function(p) {
-	var v = private.volume(p);
-	var root = config.volumes[v] || "";
-	var relative = p.substr(root.length, p.length - root.length);
-	if (!relative.indexOf(path.sep) == 0) relative = path.sep + relative;
-	return {
-		volume: v,
-		dir: root,
-		path: relative,
-		isRoot: relative == path.sep
-	}
-}
 
 /**
  * dir: absolute path
@@ -230,13 +247,3 @@ private.tmbfile = function(filename) {
 	return path.join(config.tmbroot, filename);
 }
 
-//Used by private.parse & config.acl
-private.volume = function(p) {
-	for (var i = 0; i < config.volumes.length; i++) {
-		if (i > 9) return -1;
-		if (p.indexOf(config.volumes[i]) == 0) {
-			return i;
-		}
-	}
-	return -1;
-}

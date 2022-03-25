@@ -4,44 +4,22 @@ var cors = require('cors');
 var util = require('util');
 const bodyParser = require('body-parser');
 
-var connector = require('./commands'),
+var LFS = require('./LocalFileStorage'),
+	connector = LFS.api,
 	utils = require("./utils");
 	path = require('path'),
 	promise = require('promise'),
 	multer = require('multer'),
 	fs = require('fs-extra'),
-	_ = require('underscore'),
-	private  =require("./private");
-
-config = {
-	router: '/connector',
-	disabled: ['chmod', 'mkfile', 'zipdl', 'edit', 'put', 'size'],
-	volumeicons: ['elfinder-navbar-root-local', 'elfinder-navbar-root-local']
-	//roots
-	//volumes
-	//tmbs
-}
-config.acl = function(path) {
-	var volume = private.volume(path);
-	return config.roots[volume].permissions || {
-		read: 1,
-		write: 1,
-		locked: 0
-	};
-
-}
-
-function init(options ){
-	Object.assign(config, options);
-	private.init(config);
-};
+	_ = require('underscore');
+	
 
 module.exports = function( roots ){
 
 	var volumes = roots.map( (r)=>r.path );
 	var media = path.resolve( volumes[0] );
 
-	init({
+	LFS({
 		roots: roots,
 		tmbroot: path.join(media, '.tmb'),
 		volumes: volumes
@@ -69,7 +47,6 @@ module.exports = function( roots ){
 	router.get('/', function (req, res, next) {
 		var cmd = req.query.cmd;
 		if (cmd && connector[cmd]) {
-			req.query.config = config;
 			connector[cmd]( req.query, res).then(function (result) {
 				res.json(result);
 			}).catch(function (e) {
@@ -105,7 +82,6 @@ module.exports = function( roots ){
 		var cmd =  req.body && req.body.cmd || req.query && req.query.cmd;
 		console.log("cmd:" + cmd);
 		if (cmd && connector[cmd]) {
-			req.body.config = config;
 			connector[cmd](req.body, res, req.files).then(function (result) {
 				res.json(result);
 			}).catch(function (e) {
@@ -137,4 +113,6 @@ module.exports = function( roots ){
 
 }
 
+
+module.exports.LocalFileStorage = LFS;
 module.exports.utils = utils;

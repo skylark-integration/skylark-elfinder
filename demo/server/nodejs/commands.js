@@ -7,30 +7,11 @@ var lz = require('lzutf8'),	//Remove after decoupling
 	fsextra = require('fs-extra'),
 	archiver = require('archiver'),
 	fs = require('fs'),
-	nfs = require("skynode-nfs"),
-	private  =require("./private");
+	nfs = require("skynode-nfs");
 
 elFinder = require("./elfinder");
 
 var api = {};
-config = {
-	router: '/connector',
-	disabled: ['chmod', 'mkfile', 'zipdl', 'edit', 'put', 'size'],
-	volumeicons: ['elfinder-navbar-root-local', 'elfinder-navbar-root-local']
-	//roots
-	//volumes
-	//tmbs
-}
-config.acl = function(path) {
-	var volume = private.volume(path);
-	return config.roots[volume].permissions || {
-		read: 1,
-		write: 1,
-		locked: 0
-	};
-
-}
-
 
 
 api.archive = function(opts, res) {
@@ -205,7 +186,9 @@ api.move = function(opts, res) {
 }
 
 api.open = function(opts, res) {
+	let config = opts.config;
 	return new promise(function(resolve, reject) {
+
 		var data = {};
 		data.options = {
 			uiCmdMap: [],
@@ -227,10 +210,8 @@ api.open = function(opts, res) {
 		//NOTE target must always be directory
 		_target = private.decode(_target);
 
-		console.log("private.info");
 		private.info(_target.absolutePath)
 			.then(function(result) {
-				console.log("private.info.then");
 				data.cwd = result;
 				var files;
 				try {
@@ -247,7 +228,6 @@ api.open = function(opts, res) {
 				return promise.all(tasks);
 			})
 			.then(function(files) {
-				console.log("private.info.then.2");
 				data.files = files;
 				if (_init) {
 					return private.init(config);
@@ -256,19 +236,19 @@ api.open = function(opts, res) {
 				}
 			})
 			.then(function(volumes) {
-				console.log("private.info.then.3");
 				if (volumes != null) {
 					data.files = volumes.concat(data.files);
 				}
 			})
 			.then(function() {
-				console.log("private.info.then.4:" + JSON.stringify(data));
 				resolve(data);
 			})
 	})
 }
 
 api.parents = function(opts, res) {
+	let config = opts.config;
+
 	return new promise(function(resolve, reject) {
 		if (!opts.target) return reject('errCmdParams');
 		var dir = private.decode(opts.target);
@@ -453,6 +433,8 @@ api.search = function(opts, res) {
 }
 
 api.tmb = function(opts, res) {
+	let config = opts.config;
+
 	return new promise(function(resolve, reject) {
 		var files = [];
 		if (opts.current) {
@@ -596,10 +578,7 @@ api.zipdl = function(opts, res) {
 
 
 
-module.exports = function( options ){
-	Object.assign(config, options);
-	private.init(config)
-};
-module.exports.api = api;
+
+module.exports = api;
 
 

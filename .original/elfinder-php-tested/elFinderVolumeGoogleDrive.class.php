@@ -651,6 +651,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 $this->session->remove('GoogleDriveTokens');
             }
             $aToken = $options['access_token'];
+  
+            error_log('token:' . var_export($aToken, true) . "\n", 3, 'C:/tmp/debug.txt');
 
             $rootObj = $service = null;
             if ($aToken) {
@@ -666,6 +668,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     $options['access_token'] = $aToken;
                     $this->session->set('GoogleDriveAuthParams', $options);
                 } catch (Exception $e) {
+            error_log('$e:' . var_export($e, true) . "\n", 3, 'C:/tmp/debug.txt');
+
                     $aToken = [];
                     $options['access_token'] = [];
                     if ($options['user'] !== 'init') {
@@ -684,8 +688,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 $callback = $options['url']
                     . '?cmd=netmount&protocol=googledrive&host=1';
                 $client->setRedirectUri($callback);
+ 
 
                 if (!$aToken && empty($_GET['code'])) {
+            error_log('token-1:' . var_export($aToken, true) . "\n", 3, 'C:/tmp/debug.txt');
+            error_log("no token,no code:,please auth\n", 3, 'C:/tmp/debug.txt');
                     $client->setScopes([Google_Service_Drive::DRIVE]);
                     if (!empty($options['offline'])) {
                         $client->setApprovalPrompt('force');
@@ -713,17 +720,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     }
                 } else {
                     if (!empty($_GET['code'])) {
+            error_log("have auth code:,get token\n", 3, 'C:/tmp/debug.txt');
                         $aToken = $client->fetchAccessTokenWithAuthCode($_GET['code']);
+
                         $options['access_token'] = $aToken;
                         $this->session->set('GoogleDriveTokens', $aToken)->set('GoogleDriveAuthParams', $options);
                         $out = [
                             'node' => $options['id'],
-                            'json' => '{"protocol": "googledrive", "mode": "done", "reset": 1}',
+                            'json' => '{"protocol": "googledrive", "mode": "done", "reset": 1,"token": ' . json_encode($aToken) . '}',
                             'bind' => 'netmount',
                         ];
 
                         return ['exit' => 'callback', 'out' => $out];
                     }
+
+            error_log("have token\n", 3, 'C:/tmp/debug.txt');
                     $path = $options['path'];
                     if ($path === '/') {
                         $path = 'root';

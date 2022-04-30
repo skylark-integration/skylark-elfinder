@@ -3796,10 +3796,13 @@ abstract class elFinderVolumeDriver
             $h = base64_decode(strtr($h, '-_.', '+/='));
             // TODO uncrypt hash and return path
             $path = $this->uncrypt($h);
+
             // change separator
             if ($this->separatorForHash) {
                 $path = str_replace($this->separatorForHash, $this->separator, $path);
             }
+            error_log('decode:path:' . var_export($path, true) . "\n", 3, 'C:/tmp/debug.txt');
+
             // append ROOT to path after it was cut in encode
             return $this->abspathCE($path);//$this->root.($path === $this->separator ? '' : $this->separator.$path);
         }

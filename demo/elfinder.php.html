@@ -31,11 +31,13 @@
 	<script src="jquery/jquery-1.12.4.js" type="text/javascript" charset="utf-8"></script>
 	<script src="jquery/jquery-ui-1.12.0.js" type="text/javascript" charset="utf-8"></script>
 -->
-	<script src="../dist/uncompressed/skylark-elfinder-all.js" type="text/javascript" charset="utf-8"></script>
+
+    <script type="text/javascript" src="./require.js" data-main="./main.js"></script>
+
 
 	<!-- elfinder initialization  -->
 	<script>
-		$(function() {
+		function initPage($,elFinder) {
 			$('#elfinder').elfinder(
 				// 1st Arg - options
 				{
@@ -46,7 +48,7 @@
 					baseUrl : './',
 
 					// Connector URL
-					url : 'http://localhost:8070//site2/elfinder2/php/connector.minimal.php',
+					url : 'http://localhost:3000/connector',
 
 					// Callback when a file is double-clicked
 					getFileCallback : function(file) {
@@ -89,7 +91,7 @@
 					});
 				}
 			);
-		});
+		}
 	</script>
 </head>
 <body>

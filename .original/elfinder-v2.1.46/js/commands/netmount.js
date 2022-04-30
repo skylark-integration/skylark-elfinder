@@ -45,7 +45,7 @@ elFinder.prototype.commands.netmount = function() {
 			o = self.options,
 			create = function() {
 				var winFocus = function() {
-						inputs.protocol.trigger('change', 'winfocus');
+						////inputs.protocol.trigger('change', 'winfocus'); lwf
 					},
 					inputs = {
 						protocol : $('<select/>')
@@ -114,6 +114,7 @@ elFinder.prototype.commands.netmount = function() {
 										}
 									}
 									fm.one('netmountdone', function() {
+										console.log("netmountdone")
 										fm.exec('open', data.added[0].hash);
 									});
 								}
@@ -201,6 +202,7 @@ elFinder.prototype.commands.netmount = function() {
 	};
 
 	self.fm.bind('netmount', function(e) {
+		console.log("netmount\n")
 		var d = e.data || null,
 			o = self.options;
 		if (d && d.protocol) {

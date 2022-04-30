@@ -3885,6 +3885,7 @@ class elFinder
                 }
                 $script .= '
 					var w = window.opener || window.parent || window;
+                    debugger;
 					try {
 						var elf = w.document.getElementById(\'' . $node . '\').elfinder;
 						if (elf) {
